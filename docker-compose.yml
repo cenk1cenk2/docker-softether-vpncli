@@ -1,0 +1,13 @@
+version: '3'
+services:
+  sofether-client:
+    image: sofether-client
+    build: ./build/.
+    container_name: sofether-client-int
+    env_file: .env
+    restart: "no"
+    volumes:
+      # vpn client config
+      - ./internalconn.vpn:/usr/bin/internalconn.vpn
+    privileged: true
+    network_mode: "host"
