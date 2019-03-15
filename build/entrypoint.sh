@@ -12,8 +12,6 @@ echo "Starting client daemon..."
 setcap 'cap_net_bind_service=+ep' /usr/local/bin/vpnclient
 sleep 2
 /usr/local/bin/vpnclient start
-## Delete older interfaces veth*
-for veth in $(ifconfig | grep "^veth" | cut -d' ' -f1); do ip link delete $veth ; done
 ## create nic and connect to vpn
 echo "Creating Virtual NIC..."
 /usr/bin/expect<<EOD
