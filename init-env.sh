@@ -22,5 +22,5 @@ FILENAME=.env
 echo "TZ=Europe/Vienna" > $FILENAME
 echo "# MAC Address can be commented out if specific MAC address is not required." >> $FILENAME
 echo "MACADD=00:00:00:00:00:00" >> $FILENAME
-echo "Expored .vpn file name which must include the authentication parameters as well" >> $FILENAME
+echo "# Exported .vpn file name which must include the authentication parameters as well" >> $FILENAME
 echo "CONNNAME=internalconn" >> $FILENAME
