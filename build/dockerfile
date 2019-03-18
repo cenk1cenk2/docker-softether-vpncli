@@ -1,38 +1,35 @@
 FROM alpine:latest
 
 RUN apk --no-cache --no-progress update && \
-    apk --no-cache --no-progress upgrade
-
-# Install s6 supervisor
-RUN apk --no-cache --no-progress add s6 bash && \
-    mkdir /s6 && mkdir /s6-bin && mkdir /s6/.s6-svscan
-
-# Install build dependencies
-RUN apk --no-cache --no-progress --virtual .build-deps add git libgcc libstdc++ gcc musl-dev libc-dev g++ ncurses-dev \
-    readline-dev openssl-dev cmake make
-# Grab and build Softether from GitHub
-RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN.git /tmp/softether && \
+    apk --no-cache --no-progress upgrade && \
+    # Install s6 supervisor
+    apk --no-cache --no-progress add s6 bash && \
+    mkdir /s6 && mkdir /s6-bin && mkdir /s6/.s6-svscan && \
+    # Install build dependencies
+    apk --no-cache --no-progress --virtual .build-deps add git libgcc libstdc++ gcc musl-dev libc-dev g++ ncurses-dev \
+    readline-dev openssl-dev cmake make && \
+    # Grab and build Softether from GitHub
+    git clone https://github.com/SoftEtherVPN/SoftEtherVPN.git /tmp/softether && \
     cd /tmp/softether && git submodule init && git submodule update && export USE_MUSL=YES && \
     ./configure && make --silent -C tmp && make --silent -C tmp install &&  \
-    cp /tmp/softether/build/libcedar.so /tmp/softether/build/libmayaqua.so /usr/lib
-# Removing build extensions
-RUN apk del .build-deps && apk del --no-cache --purge
-RUN rm -rf /tmp/softether && rm -rf /var/cache/apk/*
-# Deleting unncessary extensions
-RUN rm -rf /usr/local/bin/vpnbridge /usr/local/bin/vpnserver \
-    /usr/local/libexec/softether/vpnbridge /usr/local/libexec/softether/vpnserver ;
-# Reintroduce necassary libraries
-RUN apk add --no-cache --virtual .run-deps \
-    libcap libcrypto1.0 libssl1.0 ncurses-libs readline su-exec dhclient
-# Link Libraries to Binary
-RUN mkdir /s6-bin/softether-vpncli && \
+    cp /tmp/softether/build/libcedar.so /tmp/softether/build/libmayaqua.so /usr/lib && \
+    # Removing build extensions
+    apk del .build-deps && apk del --no-cache --purge && \
+    rm -rf /tmp/softether && rm -rf /var/cache/apk/* && \
+    # Deleting unncessary extensions
+    rm -rf /usr/local/bin/vpnbridge /usr/local/bin/vpnserver \
+    /usr/local/libexec/softether/vpnbridge /usr/local/libexec/softether/vpnserver && \
+    # Reintroduce necassary libraries
+    apk add --no-cache --virtual .run-deps \
+    libcap libcrypto1.0 libssl1.0 ncurses-libs readline su-exec dhclient && \
+    # Link Libraries to Binary
+    mkdir /s6-bin/softether-vpncli && \
     ln -s /usr/local/bin/vpnclient /s6-bin/softether-vpncli/vpnclient && \
-    ln -s /usr/local/bin/vpncmd /s6-bin/softether-vpncli/vpncmd
-# Link the connection profile as well since there is a bug with importing from directory
-RUN apk add --no-cache expect
+    ln -s /usr/local/bin/vpncmd /s6-bin/softether-vpncli/vpncmd && \
+    # Link the connection profile as well since there is a bug with importing from directory
+    apk add --no-cache expect
 
 # Move s6 supervisor files inside the container
 ADD ./s6 /s6
 
-# RUN apk --no-cache add expect;
 ENTRYPOINT [ "/bin/s6-svscan", "/s6" ]
