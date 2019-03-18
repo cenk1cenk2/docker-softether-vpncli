@@ -1,0 +1,18 @@
+#!/bin/sh
+
+echo
+echo "Terminate Signal caught."
+echo "--------------------------------------------------------------------------"
+echo
+
+echo
+echo "Calling all finish scripts."
+echo "--------------------------------------------------------------------------"
+echo
+for f in ../*/finish; do  
+    echo
+    echo "Calling finish script: ${f}"
+    echo "--------------------------------------------------------------------------"
+    echo
+    bash "$f" -H
+done

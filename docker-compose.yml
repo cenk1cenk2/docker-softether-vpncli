@@ -1,13 +1,13 @@
 version: '3'
 services:
-  sofether-client:
-    image: sofether-client
+  softether-vpncli-int:
+    image: softether-vpncli-int
     build: ./build/.
-    container_name: sofether-client-int
+    container_name: softether-vpncli-int
     env_file: .env
     restart: "no"
     volumes:
       # vpn client config
-      - ./internalconn.vpn:/usr/bin/internalconn.vpn
+      - ./${CONNNAME}.vpn:/s6-bin/softether-vpncli/${CONNNAME}.vpn
     privileged: true
     network_mode: "host"
