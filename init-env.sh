@@ -20,7 +20,11 @@ fi
 FILENAME=.env
 # Container specific initiate.
 echo "TZ=Europe/Vienna" > $FILENAME
-echo "# MAC Address can be commented out if specific MAC address is not required." >> $FILENAME
+echo "# Static MAC address." >> $FILENAME
+echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "MACADD=00:00:00:00:00:00" >> $FILENAME
 echo "# Exported .vpn file name which must include the authentication parameters as well" >> $FILENAME
 echo "CONNNAME=internalconn" >> $FILENAME
+echo "# Set true for internal connectione to set mtu 1200 or 1500." >> $FILENAME
+echo "# Leave empty or comment out if it is not used." >> $FILENAME
+echo "INTCONN=" >> $FILENAME

@@ -16,6 +16,7 @@ echo
 echo "Importing defined ${CONNNAME} connection."
 echo "--------------------------------------------------------------------------"
 echo
+/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountdisconnect ${CONNNAME}
 /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountdelete ${CONNNAME}
 # Writing this with expect here because command line interface does not allow / in start of filename
 # Maybe there is another way of doing that.
@@ -31,7 +32,7 @@ send "exit\r"
 EOD
 echo
 
-if ! [[ -z "${MACADD}" ]]; then
+if ! [[ -z ${MACADD} ]]; then
     echo
     echo "MAC Address variable defined in enviromental variables."
     echo "Setting MAC address of the interface to: ${MACADD}"
@@ -54,13 +55,16 @@ echo
 /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountconnect ${CONNNAME}
 
 # This is only valid for internal connections.
-echo
-echo "Set adapter MTU to 1200."
-echo "--------------------------------------------------------------------------"
-echo
-ifconfig vpn_vpn mtu 1200
-sleep 1
-ifconfig vpn_vpn down && ifconfig vpn_vpn up
+if ! [[ -z ${INTCONN} ]]; then
+    echo
+    echo "Internal connection variable defined in enviromental variables."
+    echo "Set adapter MTU to 1200."
+    echo "--------------------------------------------------------------------------"
+    echo
+    ifconfig vpn_vpn mtu 1200
+    sleep 1
+    ifconfig vpn_vpn down && ifconfig vpn_vpn up
+fi
 
 echo
 echo "Tailing log files..."
