@@ -5,22 +5,22 @@ echo
 echo "Starting Softether Client..."
 echo "--------------------------------------------------------------------------"
 echo 
-/s6-bin/softether-vpncli/vpnclient start
+/s6-bin/softether-vpncli/vpnclient start > /dev/null
 echo
 echo "Creating new virtual ethernet adapter."
 echo "--------------------------------------------------------------------------"
 echo 
-/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicdelete vpn 
-/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD niccreate vpn
+/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicdelete vpn  > /dev/null
+/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD niccreate vpn > /dev/null
 echo
 echo "Importing defined ${CONNNAME} connection."
 echo "--------------------------------------------------------------------------"
 echo
-/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountdisconnect ${CONNNAME}
-/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountdelete ${CONNNAME}
+/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountdisconnect ${CONNNAME} > /dev/null
+/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountdelete ${CONNNAME} > /dev/null
 # Writing this with expect here because command line interface does not allow / in start of filename
 # Maybe there is another way of doing that.
-/usr/bin/expect<<EOD
+/usr/bin/expect > /dev/null<<EOD
 set timeout -1
 spawn /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD
 expect "VPN Client>"
@@ -30,7 +30,6 @@ send "/s6-bin/softether-vpncli/${CONNNAME}.vpn\r"
 expect "VPN Client>"
 send "exit\r"
 EOD
-echo
 
 if ! [[ -z ${MACADD} ]]; then
     echo
@@ -38,21 +37,21 @@ if ! [[ -z ${MACADD} ]]; then
     echo "Setting MAC address of the interface to: ${MACADD}"
     echo "--------------------------------------------------------------------------"
     echo    
-    /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicsetsetting vpn /MAC:${MACADD}
-    /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicupgrade vpn
+    /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicsetsetting vpn /MAC:${MACADD} > /dev/null
+    /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicupgrade vpn > /dev/null
     echo
     echo "Restart VPN Client for MAC Address to be set."
     echo "--------------------------------------------------------------------------"
     echo 
-    /s6-bin/softether-vpncli/vpnclient stop
-    /s6-bin/softether-vpncli/vpnclient start
+    /s6-bin/softether-vpncli/vpnclient stop > /dev/null
+    /s6-bin/softether-vpncli/vpnclient start > /dev/null
 fi
 
 echo
 echo "Connecting to defined ${CONNNAME} connection."
 echo "--------------------------------------------------------------------------"
 echo
-/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountconnect ${CONNNAME}
+/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountconnect ${CONNNAME} > /dev/null
 
 # This is only valid for internal connections.
 if ! [[ -z ${INTCONN} ]]; then
@@ -61,9 +60,9 @@ if ! [[ -z ${INTCONN} ]]; then
     echo "Set adapter MTU to 1200."
     echo "--------------------------------------------------------------------------"
     echo
-    ifconfig vpn_vpn mtu 1200
-    sleep 1
-    ifconfig vpn_vpn down && ifconfig vpn_vpn up
+    ifconfig vpn_vpn mtu 1200 > /dev/null
+    sleep 1 > /dev/null
+    ifconfig vpn_vpn down && ifconfig vpn_vpn up > /dev/null
 fi
 
 echo
@@ -75,7 +74,7 @@ echo
 echo "Requesting IP Address from Server"
 echo "--------------------------------------------------------------------------"
 echo
-dhclient vpn_vpn
+dhclient vpn_vpn > /dev/null
 IPADDRESS=$(ifconfig vpn_vpn | awk '/inet addr/{print substr($2,6)}')
 if ! [[ -z "${IPADDRESS}" ]]; then
     echo
