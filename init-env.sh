@@ -20,6 +20,9 @@ fi
 FILENAME=.env
 # Container specific initiate.
 echo "TZ=Europe/Vienna" > $FILENAME
+echo "#" >> $FILENAME
+echo "# SOFTETHER VPN CLIENT SETTINGS" > $FILENAME
+echo "#" >> $FILENAME
 echo "# Static MAC address." >> $FILENAME
 echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "MACADD=00:00:00:00:00:00" >> $FILENAME
@@ -28,3 +31,31 @@ echo "CONNNAME=internalconn" >> $FILENAME
 echo "# Set true for internal connectione to set mtu 1200 or 1500." >> $FILENAME
 echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "INTCONN=" >> $FILENAME
+echo "#" >> $FILENAME
+echo "# EMBEDDED SAMBA SERVER SETTINGS" >> $FILENAME
+echo "#" >> $FILENAME
+echo "# Leave empty or comment out if it is not used." >> $FILENAME
+echo "SAMBAENABLE=" >> $FILENAME
+echo "SRVNAME=" >> $FILENAME
+echo "# USERS: required arg: \"<username>;<passwd>\"
+# <username> for user
+# <password> for user
+# [ID] for user
+# [group] for user
+# multiple user format: example1;badpass:example2;badpass" >> $FILENAME
+echo "USERS=" >> $FILENAME
+echo "# MOUNTS: Configure a share
+# required arg: \"<name>;</path>\"
+# <name> is how it's called for clients
+# <path> path to share
+# NOTE: for the default value, just leave blank
+# [browsable] default:'yes' or 'no'
+# [readonly] default:'yes' or 'no'
+# [guest] allowed default:'yes' or 'no'
+# [users] allowed default:'all' or list of allowed users
+# [admins] allowed default:'none' or list of admin users
+# [writelist] list of users that can write to a RO share
+# [comment] description of share
+# multiple mount format: example1 private share;/example1;no;no;no;example1:example2 private share;/example2;no;no;no;example2" >> $FILENAME
+echo "MOUNTS=" >> $FILENAME
+echo "WORKGROUPNAME=WORKGROUP" >> $FILENAME
