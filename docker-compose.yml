@@ -1,9 +1,9 @@
 version: '3'
 services:
-  softether-vpncli-int:
-    image: softether-vpncli-int
+  softether-vpncli:
+    image: softether-vpncli
     build: ./build/.
-    container_name: softether-vpncli-int
+    container_name: softether-vpncli
     env_file: .env
     restart: "no"
     volumes:
