@@ -5,6 +5,8 @@ services:
     build: ./build/.
     container_name: softether-vpncli
     env_file: .env
+    labels:
+      - com.centurylinklabs.watchtower.enable="false"
     restart: "no"
     volumes:
       # vpn client config
