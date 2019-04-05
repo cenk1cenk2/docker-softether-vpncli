@@ -60,9 +60,9 @@ if ! [[ -z ${INTCONN} ]]; then
     echo "Set adapter MTU to 1200."
     echo "--------------------------------------------------------------------------"
     echo
-    ifconfig vpn_vpn mtu 1200 > /dev/null
+    ifconfig vpn_${ADAPTERNAME} mtu 1200 > /dev/null
     sleep 1 > /dev/null
-    ifconfig vpn_vpn down && ifconfig vpn_vpn up > /dev/null
+    ifconfig vpn_${ADAPTERNAME} down && ifconfig vpn_${ADAPTERNAME} up > /dev/null
 fi
 
 echo
@@ -75,7 +75,7 @@ echo "Requesting IP Address from Server"
 echo "--------------------------------------------------------------------------"
 echo
 dhclient vpn_vpn > /dev/null
-IPADDRESS=$(ifconfig vpn_vpn | awk '/inet addr/{print substr($2,6)}')
+IPADDRESS=$(ifconfig vpn_${ADAPTERNAME} | awk '/inet addr/{print substr($2,6)}')
 if ! [[ -z "${IPADDRESS}" ]]; then
     echo
     echo "IP Address Obtained: ${IPADDRESS}"
@@ -93,4 +93,6 @@ if ! [[ -z "${IPADDRESS}" ]]; then
     done
 else
     echo "err: Can not obtain IP Address."
+    echo "Retrying to connect in 3 seconds."
+    sleep 3
 fi
