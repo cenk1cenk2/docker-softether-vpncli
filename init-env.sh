@@ -23,6 +23,8 @@ echo "TZ=Europe/Vienna" > $FILENAME
 echo "#" >> $FILENAME
 echo "# SOFTETHER VPN CLIENT SETTINGS" > $FILENAME
 echo "#" >> $FILENAME
+echo "# Adapter Name can take the form of vpn[2-...] so only a number is written" >> $FILENAME
+echo "ADAPTERNAME=" >> $FILENAME
 echo "# Static MAC address." >> $FILENAME
 echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "MACADD=00:00:00:00:00:00" >> $FILENAME
