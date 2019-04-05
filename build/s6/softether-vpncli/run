@@ -10,8 +10,8 @@ echo
 echo "Creating new virtual ethernet adapter."
 echo "--------------------------------------------------------------------------"
 echo 
-/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicdelete ${ADAPTERNAME}  > /dev/null
-/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD niccreate ${ADAPTERNAME} > /dev/null
+eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicdelete vpn${ADAPTERNAME}  > /dev/null
+eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD niccreate vpn${ADAPTERNAME} > /dev/null
 echo
 echo "Importing defined ${CONNNAME} connection."
 echo "--------------------------------------------------------------------------"
@@ -37,8 +37,8 @@ if ! [[ -z ${MACADD} ]]; then
     echo "Setting MAC address of the interface to: ${MACADD}"
     echo "--------------------------------------------------------------------------"
     echo    
-    /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicsetsetting ${ADAPTERNAME} /MAC:${MACADD} > /dev/null
-    /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicupgrade ${ADAPTERNAME} > /dev/null
+    eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicsetsetting vpn${ADAPTERNAME} /MAC:${MACADD} > /dev/null
+    eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicupgrade vpn${ADAPTERNAME} > /dev/null
     echo
     echo "Restart VPN Client for MAC Address to be set."
     echo "--------------------------------------------------------------------------"
@@ -51,7 +51,7 @@ echo
 echo "Connecting to defined ${CONNNAME} connection."
 echo "--------------------------------------------------------------------------"
 echo
-/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountconnect ${CONNNAME} > /dev/null
+/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountconnect ${CONNNAME}
 
 # This is only valid for internal connections.
 if ! [[ -z ${INTCONN} ]]; then
@@ -60,9 +60,8 @@ if ! [[ -z ${INTCONN} ]]; then
     echo "Set adapter MTU to 1200."
     echo "--------------------------------------------------------------------------"
     echo
-    ifconfig vpn_${ADAPTERNAME} mtu 1200 > /dev/null
-    sleep 1 > /dev/null
-    ifconfig vpn_${ADAPTERNAME} down && ifconfig vpn_${ADAPTERNAME} up > /dev/null
+    eval ifconfig vpn_vpn${ADAPTERNAME} mtu 1200 > /dev/null
+    eval ifconfig vpn_vpn${ADAPTERNAME} down && sleep 1 && ifconfig vpn_vpn${ADAPTERNAME} up > /dev/null
 fi
 
 echo
@@ -74,7 +73,7 @@ echo
 echo "Requesting IP Address from Server"
 echo "--------------------------------------------------------------------------"
 echo
-dhclient vpn_vpn > /dev/null
+eval dhclient vpn_${ADAPTERNAME} > /dev/null
 IPADDRESS=$(ifconfig vpn_${ADAPTERNAME} | awk '/inet addr/{print substr($2,6)}')
 if ! [[ -z "${IPADDRESS}" ]]; then
     echo
