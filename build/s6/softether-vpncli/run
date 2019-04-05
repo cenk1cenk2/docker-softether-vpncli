@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # SOFTETHER START
 echo
@@ -10,8 +10,8 @@ echo
 echo "Creating new virtual ethernet adapter."
 echo "--------------------------------------------------------------------------"
 echo 
-/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicdelete vpn  > /dev/null
-/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD niccreate vpn > /dev/null
+/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicdelete ${ADAPTERNAME}  > /dev/null
+/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD niccreate ${ADAPTERNAME} > /dev/null
 echo
 echo "Importing defined ${CONNNAME} connection."
 echo "--------------------------------------------------------------------------"
@@ -37,8 +37,8 @@ if ! [[ -z ${MACADD} ]]; then
     echo "Setting MAC address of the interface to: ${MACADD}"
     echo "--------------------------------------------------------------------------"
     echo    
-    /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicsetsetting vpn /MAC:${MACADD} > /dev/null
-    /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicupgrade vpn > /dev/null
+    /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicsetsetting ${ADAPTERNAME} /MAC:${MACADD} > /dev/null
+    /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicupgrade ${ADAPTERNAME} > /dev/null
     echo
     echo "Restart VPN Client for MAC Address to be set."
     echo "--------------------------------------------------------------------------"
