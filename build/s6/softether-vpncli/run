@@ -10,9 +10,7 @@ echo
 echo "Get adapter name in the defined connection."
 echo "--------------------------------------------------------------------------"
 echo 
-/s6-bin/softether-vpncli/${CONNNAME}.vpn
-
-
+ADAPTERNAME=$(grep -E DeviceName ${CONNNAME}.vpn | sed -r 's/.*DeviceName VPN(.*)$/\1/')
 echo
 echo "Creating new virtual ethernet adapter."
 echo "--------------------------------------------------------------------------"
