@@ -23,13 +23,11 @@ echo "TZ=Europe/Vienna" > $FILENAME
 echo "#" >> $FILENAME
 echo "# SOFTETHER VPN CLIENT SETTINGS" > $FILENAME
 echo "#" >> $FILENAME
-echo "# Adapter Name can take the form of vpn[2-...] so only a number is written" >> $FILENAME
-echo "ADAPTERNAME=" >> $FILENAME
+echo "# Exported .vpn file name which must include the authentication parameters as well" >> $FILENAME
+echo "CONNNAME=internalconn" >> $FILENAME
 echo "# Static MAC address." >> $FILENAME
 echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "MACADD=00:00:00:00:00:00" >> $FILENAME
-echo "# Exported .vpn file name which must include the authentication parameters as well" >> $FILENAME
-echo "CONNNAME=internalconn" >> $FILENAME
 echo "# Set true for internal connectione to set mtu 1200 or 1500." >> $FILENAME
 echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "INTCONN=" >> $FILENAME
