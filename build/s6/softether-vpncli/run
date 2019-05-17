@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # SOFTETHER START
 echo
@@ -7,11 +7,16 @@ echo "--------------------------------------------------------------------------
 echo 
 /s6-bin/softether-vpncli/vpnclient start > /dev/null
 echo
+echo "Get adapter name in the defined connection."
+echo "--------------------------------------------------------------------------"
+echo 
+ADAPTERNAME=$(eval grep -E "DeviceName" /s6-bin/softether-vpncli/${CONNNAME}.vpn | sed -r 's/.*DeviceName VPN(.*)$/\1/' | sed 's/\r//g')
+echo
 echo "Creating new virtual ethernet adapter."
 echo "--------------------------------------------------------------------------"
 echo 
-/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicdelete vpn  > /dev/null
-/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD niccreate vpn > /dev/null
+eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicdelete vpn${ADAPTERNAME}  > /dev/null
+eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD niccreate vpn${ADAPTERNAME} > /dev/null
 echo
 echo "Importing defined ${CONNNAME} connection."
 echo "--------------------------------------------------------------------------"
@@ -37,8 +42,8 @@ if ! [[ -z ${MACADD} ]]; then
     echo "Setting MAC address of the interface to: ${MACADD}"
     echo "--------------------------------------------------------------------------"
     echo    
-    /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicsetsetting vpn /MAC:${MACADD} > /dev/null
-    /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicupgrade vpn > /dev/null
+    eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicsetsetting vpn${ADAPTERNAME} /MAC:${MACADD} > /dev/null
+    eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicupgrade vpn${ADAPTERNAME} > /dev/null
     echo
     echo "Restart VPN Client for MAC Address to be set."
     echo "--------------------------------------------------------------------------"
@@ -51,7 +56,8 @@ echo
 echo "Connecting to defined ${CONNNAME} connection."
 echo "--------------------------------------------------------------------------"
 echo
-/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountconnect ${CONNNAME} > /dev/null
+sleep 3
+eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountconnect ${CONNNAME} > /dev/null
 
 # This is only valid for internal connections.
 if ! [[ -z ${INTCONN} ]]; then
@@ -60,9 +66,8 @@ if ! [[ -z ${INTCONN} ]]; then
     echo "Set adapter MTU to 1200."
     echo "--------------------------------------------------------------------------"
     echo
-    ifconfig vpn_vpn mtu 1200 > /dev/null
-    sleep 1 > /dev/null
-    ifconfig vpn_vpn down && ifconfig vpn_vpn up > /dev/null
+    eval ip link set dev vpn_vpn${ADAPTERNAME} mtu 1200 > /dev/null
+    eval ip link set vpn_vpn${ADAPTERNAME} down && sleep 1 && ip link set vpn_vpn${ADAPTERNAME} up > /dev/null
 fi
 
 echo
@@ -74,8 +79,8 @@ echo
 echo "Requesting IP Address from Server"
 echo "--------------------------------------------------------------------------"
 echo
-dhclient vpn_vpn > /dev/null
-IPADDRESS=$(ifconfig vpn_vpn | awk '/inet addr/{print substr($2,6)}')
+eval dhclient vpn_vpn${ADAPTERNAME} > /dev/null
+IPADDRESS=$(ifconfig vpn_vpn${ADAPTERNAME} | awk '/inet addr/{print substr($2,6)}')
 if ! [[ -z "${IPADDRESS}" ]]; then
     echo
     echo "IP Address Obtained: ${IPADDRESS}"
@@ -93,4 +98,6 @@ if ! [[ -z "${IPADDRESS}" ]]; then
     done
 else
     echo "err: Can not obtain IP Address."
+    echo "Retrying to connect in 3 seconds."
+    sleep 3
 fi

@@ -13,3 +13,5 @@ services:
       - ./${CONNNAME}.vpn:/s6-bin/softether-vpncli/${CONNNAME}.vpn
     privileged: true
     network_mode: "host"
+    cap_add: 
+      - NET_ADMIN
