@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo 
 echo "--------------------------------------------------------------------------"
@@ -12,7 +12,7 @@ echo
 echo "Deleting Virtual Network Adapter"
 echo "--------------------------------------------------------------------------"
 echo 
-/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicdelete vpn
+/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicdelete vpn${ADAPTERNAME}
 echo 
 echo "Shutting down the daemon"
 echo "--------------------------------------------------------------------------"
