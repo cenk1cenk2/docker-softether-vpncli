@@ -1,10 +1,7 @@
-**DEVELOPMENT VERSION**
-* Added function to auto detect the virtual adapter name from the vpn import.
-* _trying to correct function that it is not connecting automaticly to any other network then internalconn_
 ```
 name:         | softether-vpncli
 compiler:     | docker-compose + dockerfile
-version:      | v2.1, 20190319
+version:      | v2.2, 20190319
 ```
 ## Description:
 
