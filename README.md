@@ -17,7 +17,7 @@ Creates a Softether instance to connect to the defined connection in the importe
 
 ## Setup
 
-Clone the GitHub repository to get enviromental variable initiation script and preconfigured docker-compose file if you wish to fast start.
+Clone the GitHub repository to get enviromental variable initiation script and preconfigured docker-compose file if you wish to get a head start.
 
 ### Softether VPN Connection Settings
 * `cp defaulconn.vpn` to root directory for automatic connection to that setting.
@@ -33,14 +33,25 @@ If it is not possible to run the shell script that will generate the default .en
 Only mandatory variables are: $CONNNAME and $SLEEPTIME. But they both have default values to fallback to if you dont want to define any variables while running on command line.
 
 #### Example Setup
-`docker run -d cenk1cenk2/softether-vpncli -v ./connectionname.vpn:/defaultconn.vpn` will connect to defined connection in connectionname.vpn, it will only connect the *container* to the VPN.
+```docker run -d cenk1cenk2/softether-vpncli -v ./connectionname.vpn:/defaultconn.vpn```
+will connect to defined connection in connectionname.vpn, it will only connect the *container* to the VPN.
 
-`docker run -d cenk1cenk2/softether-vpncli -v ./connectionname.vpn:/defaultconn.vpn --cap-add NET_ADMIN` will connect to defined connection in connectionname.vpn, it will *also connect your host PC* __if running Linux__ to the VPN as well.
+```docker run -d cenk1cenk2/softether-vpncli -v ./connectionname.vpn:/defaultconn.vpn --cap-add NET_ADMIN```
+will connect to defined connection in connectionname.vpn, it will *also connect your host PC* __if running Linux__ to the VPN as well.
 
 ```
-docker run -d cenk1cenk2/softether-vpncli -v ./connectionname.vpn:/defaultconn.vpn --cap-add NET_ADMIN \ -e MACADDRESS=00:00:00:00:00 \
--e
+docker run -d cenk1cenk2/softether-vpncli \
+-v ./connectionname.vpn:/defaultconn.vpn \
+-v /sharePath:/share/path1 \
+-v /anotherShare:/share/path2 \
+--cap-add NET_ADMIN \
+-e INTCONN=true \
+-e SAMBAENABLE=true \
+-e SRVNAME=FILESHARESERVERNAME \
+-e USERS=shareaccess;password:secondshare;password \
+-e share;/share/path1;no;no;no;shareaccess:share2;/share/path2;no;no;no;secondshare
 ```
+will connect to defined connection in connectionname, and create 2 shasres at paths /share/path1 and /share/path2 giving access to different users for different paths. The file server name wil lbe \\\\FILESHARESERVERNAME and the MTU will be set to 1200 to enable users to use Samba over VPN connection.
 
 #### Enviromental Variables File with Explanation
 ```
