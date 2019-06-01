@@ -1,9 +1,11 @@
+## Refer to the GitHub repository for configuration and problems.
+## Cenk Kilic <cenk@kilic.dev>
+## https://srcs.kilic.dev/softether-vpncli
 version: '3'
 services:
-  softether-vpncli-test:
-    image: softether-vpncli-test
-    build: ./build/.
-    container_name: softether-vpncli-test
+  softether-vpncli:
+    image: cenk1cenk2/softether-vpncli
+    container_name: softether-vpncli
     env_file: .env
     restart: "no"
     volumes:

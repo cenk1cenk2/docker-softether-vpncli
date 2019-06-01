@@ -1,3 +1,7 @@
+## Refer to the GitHub repository for configuration and problems.
+## Cenk Kilic <cenk@kilic.dev>
+## https://srcs.kilic.dev/softether-vpncli
+
 FROM alpine:3.8.4
 
 RUN apk --no-cache --no-progress update && \

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+## Refer to the GitHub repository for configuration and problems.
+## Cenk Kilic <cenk@kilic.dev>
+## https://srcs.kilic.dev/
+
 echo "Initiating .env file for given container."
 
 if [ ! -f ./.env ]; then

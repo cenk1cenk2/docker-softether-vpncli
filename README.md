@@ -14,7 +14,7 @@ A Docker Container that creates a Softether Client instance to connect to the de
 * The connection will be checked every defined seconds to X.X.X.1 as the server to be sure of that it is still alive and if the server can not be reached it will restart the whole process thanks to S6-Overlay in case of hangs.
 * Ability to enable embedded Samba Server if you desire to share files between devices in a private network.
 * Internal connection switch, which will reduce the MTU of the virtual ethernet adapter to 1200 so that Samba shares through the internet will not be slow due to the overhead of the packets with VPN data and instead of trying to split into multiple packets.
-* Always builds the latest version from the official GitHub repository of SoftEther. The base operating system is fixed for Alpine 3.8.4 for now, since for the edge version there were some problems and I choose stability over the edge version which doesn't matter.
+* Always builds the latest version from the official GitHub repository of SoftEther. The base operating system is fixed for Alpine 3.8.4 for now, since for the edge version libcrypto1.0 and libssl1.0 are missing from the reporistories and they are running dependencies.
 * ~70MB image size, ~15-20MB RAM Usage while standalone.
 
 ## Setup
@@ -35,26 +35,30 @@ If it is not possible to run the shell script that will generate the default .en
 Only mandatory variables are $CONNNAME and $SLEEPTIME. But they both have default values to fall back to if you don't want to define any variables while running on the command line.
 
 #### Example Setup
-```docker run -d cenk1cenk2/softether-vpncli -v ./connectionname.vpn:/defaultconn.vpn```
+
+```docker run --name softether-vpncli -v $(pwd)/defaultconn.vpn:/defaultconn.vpn --network bridge --privileged cenk1cenk2/softether-vpncli```
 will connect to defined connection in connectionname.vpn, it will only connect the *container* to the VPN.
 
-```docker run -d cenk1cenk2/softether-vpncli -v ./connectionname.vpn:/defaultconn.vpn --cap-add NET_ADMIN```
+```docker run --name softether-vpncli -v $(pwd)/defaultconn.vpn:/defaultconn.vpn --network host --privileged cenk1cenk2/softether-vpncli```
 will connect to defined connection in connectionname.vpn, it will *also connect your host PC* __if running Linux__ to the VPN as well.
 
 ```
-docker run -d cenk1cenk2/softether-vpncli \
--v ./connectionname.vpn:/defaultconn.vpn \
--v /sharePath:/share/path1 \
--v /anotherShare:/share/path2 \
+docker run -d \
+--name softether-vpncli \
+-v $(pwd)/connectionname.vpn:/defaultconn.vpn \
+-v $(pwd)/sharePath:/share/path1 \
+-v /files/anotherShare:/share/path2 \
 --network host --privileged \
 -e INTCONN=true \
 -e SAMBAENABLE=true \
 -e SRVNAME=FILESHARESERVERNAME \
 -e USERS=shareaccess;password:secondshare;password \
--e share;/share/path1;no;no;no;shareaccess:share2;/share/path2;no;no;no;secondshare
+-e share;/share/path1;no;no;no;shareaccess:share2;/share/path2;no;no;no;secondshare \
+cenk1cenk2/softether-vpncli
 ```
 will connect to defined connection in connectionname, and create 2 shasres at paths /share/path1 and /share/path2 giving access to different users for different paths. The file server name will be \\\\FILESHARESERVERNAME and the MTU will be set to 1200 to enable users to use Samba over VPN connection. You can use `-p 139:139 -p 445:445` to passthrough Samba Server ports instead of `--network host --privileged` if you can not use the host mode network connection. 
-**Unfortunately, CAP_ADD is not enough privileges this container to function in host mode. So until any one knows why it has to run as privileged when you are in network host mode.**
+
+**Unfortunately, CAP_ADD is not enough privileges this container to function in host mode. It has to create virtual adapter but I dont know how it is releated to host system. So until any one knows why it has to run as privileged.**
 
 #### Enviromental Variables File with Explanation
 ```
