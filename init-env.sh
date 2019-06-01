@@ -27,7 +27,7 @@ echo "# TIMEZONE" >> $FILENAME
 echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "TZ=" >> $FILENAME
 echo "##" >> $FILENAME
-echo "# SOFTETHER VPN CLIENT SETTINGS" > $FILENAME
+echo "# SOFTETHER VPN CLIENT SETTINGS" >> $FILENAME
 echo "##" >> $FILENAME
 echo "# VPN file relative path. Exported .vpn file name which must include the authentication parameters as well" >> $FILENAME
 echo "# Mandatory, Default defaultconn" >> $FILENAME
@@ -42,6 +42,9 @@ echo "# Set true for internal connectione to set mtu 1200 or 1500." >> $FILENAME
 echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "INTCONN=" >> $FILENAME
 echo "##" >> $FILENAME
+echo "# If your network gateway address of the VPN server is different than 1, it will override it." >> $FILENAME
+echo "# Leave empty or comment out if it is not used." >> $FILENAME
+echo "NETWORKGATEWAY=" >> $FILENAME
 echo "# EMBEDDED SAMBA SERVER SETTINGS" >> $FILENAME
 echo "##" >> $FILENAME
 echo "# Enable or disable internal Samba server." >> $FILENAME

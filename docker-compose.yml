@@ -1,18 +1,16 @@
 version: '3'
 services:
-  softether-vpncli:
-    image: softether-vpncli
+  softether-vpncli-test:
+    image: softether-vpncli-test
     build: ./build/.
-    container_name: softether-vpncli
+    container_name: softether-vpncli-test
     env_file: .env
-    labels:
-      - com.centurylinklabs.watchtower.enable="false"
     restart: "no"
     volumes:
       # vpn client config
       - ./${CONNNAME}.vpn:/${CONNNAME}.vpn
       # samba share paths if samba enabled
+    # Set this to host if you want to connect your host computer if Linux to VPN or just the container, else bridge
     network_mode: "host"
     # Add this if you want to connect your host computer if Linux to VPN or just the container
-    cap_add: 
-      - NET_ADMIN
+    privileged: true
