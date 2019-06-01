@@ -19,30 +19,47 @@ fi
 
 FILENAME=.env
 # Container specific initiate.
-echo "TZ=Europe/Vienna" > $FILENAME
-echo "#" >> $FILENAME
-echo "# SOFTETHER VPN CLIENT SETTINGS" > $FILENAME
-echo "#" >> $FILENAME
-echo "# Exported .vpn file name which must include the authentication parameters as well" >> $FILENAME
-echo "CONNNAME=internalconn" >> $FILENAME
+echo "" > $FILENAME
+echo "##" >> $FILENAME
+echo "# GENERAL SETTINGS" >> $FILENAME
+echo "##" >> $FILENAME
+echo "# TIMEZONE" >> $FILENAME
+echo "# Leave empty or comment out if it is not used." >> $FILENAME
+echo "TZ=" >> $FILENAME
+echo "##" >> $FILENAME
+echo "# SOFTETHER VPN CLIENT SETTINGS" >> $FILENAME
+echo "##" >> $FILENAME
+echo "# VPN file relative path. Exported .vpn file name which must include the authentication parameters as well" >> $FILENAME
+echo "# Mandatory, Default defaultconn" >> $FILENAME
+echo "CONNNAME=defaultconn" >> $FILENAME
+echo "# The script will check VPN connection periodically please define the period in seconds between checks." >> $FILENAME
+echo "# Mandatory, Default 3600" >> $FILENAME
+echo "SLEEPTIME=3600" >> $FILENAME
 echo "# Static MAC address." >> $FILENAME
 echo "# Leave empty or comment out if it is not used." >> $FILENAME
-echo "MACADD=00:00:00:00:00:00" >> $FILENAME
+echo "MACADD=" >> $FILENAME
 echo "# Set true for internal connectione to set mtu 1200 or 1500." >> $FILENAME
 echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "INTCONN=" >> $FILENAME
-echo "#" >> $FILENAME
+echo "##" >> $FILENAME
+echo "# If your network gateway address of the VPN server is different than 1, it will override it." >> $FILENAME
+echo "# Leave empty or comment out if it is not used." >> $FILENAME
+echo "NETWORKGATEWAY=" >> $FILENAME
 echo "# EMBEDDED SAMBA SERVER SETTINGS" >> $FILENAME
-echo "#" >> $FILENAME
+echo "##" >> $FILENAME
+echo "# Enable or disable internal Samba server." >> $FILENAME
 echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "SAMBAENABLE=" >> $FILENAME
+echo "# Server WINS identification name" >> $FILENAME
+echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "SRVNAME=" >> $FILENAME
 echo "# USERS: required arg: \"<username>;<passwd>\"
 # <username> for user
 # <password> for user
 # [ID] for user
 # [group] for user
-# multiple user format: example1;badpass:example2;badpass" >> $FILENAME
+# multiple user format: example1;password:example2;password" >> $FILENAME
+echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "USERS=" >> $FILENAME
 echo "# MOUNTS: Configure a share
 # required arg: \"<name>;</path>\"
@@ -57,5 +74,8 @@ echo "# MOUNTS: Configure a share
 # [writelist] list of users that can write to a RO share
 # [comment] description of share
 # multiple mount format: example1 private share;/example1;no;no;no;example1:example2 private share;/example2;no;no;no;example2" >> $FILENAME
+echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "MOUNTS=" >> $FILENAME
+echo "# WORKGROUP NAME" >> $FILENAME
+echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "WORKGROUPNAME=WORKGROUP" >> $FILENAME
