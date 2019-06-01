@@ -90,4 +90,7 @@ ADD ./s6 /s6
 # Move Binaries to bin
 ADD ./s6-bin /s6-bin
 
+# Expose samba ports
+EXPOSE 139 445
+
 ENTRYPOINT [ "/bin/s6-svscan", "/s6" ]

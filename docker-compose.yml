@@ -10,6 +10,9 @@ services:
       # vpn client config
       - ./${CONNNAME}.vpn:/${CONNNAME}.vpn
       # samba share paths if samba enabled
+    # ports:
+      # - 139:139
+      # - 445:445
     # Set this to host if you want to connect your host computer if Linux to VPN or just the container, else bridge
     network_mode: "host"
     # Add this if you want to connect your host computer if Linux to VPN or just the container
