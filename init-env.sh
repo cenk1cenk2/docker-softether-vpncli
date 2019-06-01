@@ -38,7 +38,7 @@ echo "SLEEPTIME=3600" >> $FILENAME
 echo "# Static MAC address." >> $FILENAME
 echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "MACADD=" >> $FILENAME
-echo "# Set true for internal connectione to set mtu 1200 or 1500." >> $FILENAME
+echo "# Set true for internal connection to set mtu 1200 or 1500." >> $FILENAME
 echo "# Leave empty or comment out if it is not used." >> $FILENAME
 echo "INTCONN=" >> $FILENAME
 echo "##" >> $FILENAME
