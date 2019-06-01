@@ -19,7 +19,7 @@ fi
 
 FILENAME=.env
 # Container specific initiate.
-> $FILENAME
+echo "" > $FILENAME
 echo "##" >> $FILENAME
 echo "# GENERAL SETTINGS" >> $FILENAME
 echo "##" >> $FILENAME
