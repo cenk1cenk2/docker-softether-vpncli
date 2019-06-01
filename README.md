@@ -3,9 +3,11 @@ name:         | softether-vpncli
 compiler:     | docker-compose + dockerfile
 version:      | v2.3, 20190601
 ```
+# softether-vpncli@docker
+
 ## Description:
 
-Creates a Softether instance to connect to the defined connection in the imported VPN file.
+A Docker Container that creates a Softether Client instance to connect to the defined connection in the imported VPN file with an option to enable Samba File Sharing server to internally share files through VPN.
 
 ### Features
 * S6-Overlay implemented. So in every new connection a new virtual adapter will be created and after the connection is terminated, it will be removed gracefuly.
@@ -51,10 +53,17 @@ docker run -d cenk1cenk2/softether-vpncli \
 -e USERS=shareaccess;password:secondshare;password \
 -e share;/share/path1;no;no;no;shareaccess:share2;/share/path2;no;no;no;secondshare
 ```
-will connect to defined connection in connectionname, and create 2 shasres at paths /share/path1 and /share/path2 giving access to different users for different paths. The file server name wil lbe \\\\FILESHARESERVERNAME and the MTU will be set to 1200 to enable users to use Samba over VPN connection.
+will connect to defined connection in connectionname, and create 2 shasres at paths /share/path1 and /share/path2 giving access to different users for different paths. The file server name wil lbe \\\\FILESHARESERVERNAME and the MTU will be set to 1200 to enable users to use Samba over VPN connection. You can use `-p 139:139 -p 445:445` to passthrough Samba Server ports instead of `--cap-add NET_ADMIN` if you can not use the host mode network connection.
 
 #### Enviromental Variables File with Explanation
 ```
+##
+# GENERAL SETTINGS
+##
+# TIMEZONE
+# Leave empty or comment out if it is not used.
+TZ=
+##
 # SOFTETHER VPN CLIENT SETTINGS
 ##
 # VPN file relative path. Exported .vpn file name which must include the authentication parameters as well
@@ -70,6 +79,9 @@ MACADD=
 # Leave empty or comment out if it is not used.
 INTCONN=
 ##
+# If your network gateway address of the VPN server is different than 1, it will override it.
+# Leave empty or comment out if it is not used.
+NETWORKGATEWAY=
 # EMBEDDED SAMBA SERVER SETTINGS
 ##
 # Enable or disable internal Samba server.
