@@ -10,8 +10,9 @@ services:
     restart: "no"
     volumes:
       # vpn client config
-      - ./${CONNNAME}.vpn:/s6-bin/softether-vpncli/${CONNNAME}.vpn
-    privileged: true
+      - ./${CONNNAME}.vpn:/${CONNNAME}.vpn
+      # samba share paths if samba enabled
     network_mode: "host"
+    # Add this if you want to connect your host computer if Linux to VPN or just the container
     cap_add: 
       - NET_ADMIN
