@@ -6,7 +6,7 @@ echo "Starting Softether Client..."
 echo "-----------------------------------------------------------------"
 /s6-bin/softether-vpncli/vpnclient start > /dev/null
 echo "Get adapter name in the defined connection."
-ADAPTERNAME=$(eval grep -E "DeviceName" /${CONNNAME:-defaultconn}.vpn | sed -r 's/.*DeviceName VPN(.*)$/\1/' | sed 's/\r//g')
+ADAPTERNAME=$(eval grep -E "DeviceName" /${CONNNAME:-defaultconn}.vpn | sed -r 's/.*DeviceName VPN(.*)$/\1/I' | sed 's/\r//g')
 echo "Adapter Name: ${ADAPTERNAME}"
 echo "Get account name in the defined connection."
 ACCOUNTNAME=$(eval grep -E "AccountName" /${CONNNAME:-defaultconn}.vpn | sed -r 's/.*AccountName (.*)$/\1/' | sed 's/\r//g')
@@ -38,7 +38,7 @@ if ! [[ -z ${MACADD} ]]; then
     eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicupgrade vpn${ADAPTERNAME} > /dev/null
     echo "Restart VPN Client for MAC Address to be set."
     echo "-----------------------------------------------------------------"
-    echo 
+    echo
     /s6-bin/softether-vpncli/vpnclient stop > /dev/null
     /s6-bin/softether-vpncli/vpnclient start > /dev/null
 fi
@@ -57,10 +57,6 @@ if ! [[ -z ${INTCONN} ]]; then
     eval ip link set vpn_vpn${ADAPTERNAME} down && sleep 1 && ip link set vpn_vpn${ADAPTERNAME} up > /dev/null
 fi
 
-echo "-----------------------------------------------------------------"
-echo "Tailing log files..."
-echo "-----------------------------------------------------------------"
-tail -F /usr/local/libexec/softether/vpnclient/*_log/*.log &
 echo "-----------------------------------------------------------------"
 echo "Requesting IP Address from Server"
 echo "-----------------------------------------------------------------"

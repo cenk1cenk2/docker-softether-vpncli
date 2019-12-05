@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Treat unset variables as an error
-set -o nounset                              
+set -o nounset
 
 ### charmap: setup character mapping for file/directory names
 # Arguments:

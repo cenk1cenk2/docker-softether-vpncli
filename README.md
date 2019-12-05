@@ -1,7 +1,7 @@
 ```
 name:         | softether-vpncli
 compiler:     | docker-compose + dockerfile
-version:      | v2.3, 20190601
+version:      | v2.4, 20191205
 ```
 # softether-vpncli@docker
 
@@ -14,7 +14,7 @@ A Docker Container that creates a Softether Client instance to connect to the de
 * The connection will be checked every defined seconds to X.X.X.1 as the server to be sure of that it is still alive and if the server can not be reached it will restart the whole process thanks to S6-Overlay in case of hangs.
 * Ability to enable embedded Samba Server if you desire to share files between devices in a private network.
 * Internal connection switch, which will reduce the MTU of the virtual ethernet adapter to 1200 so that Samba shares through the internet will not be slow due to the overhead of the packets with VPN data and instead of trying to split into multiple packets.
-* Always builds the latest version from the official GitHub repository of SoftEther. The base operating system is fixed for Alpine 3.8.4 for now, since for the edge version libcrypto1.0 and libssl1.0 are missing from the reporistories and they are running dependencies.
+* Always builds the latest version from the official GitHub repository of SoftEther.
 * ~70MB image size, ~15-20MB RAM Usage while standalone.
 
 ## Setup
@@ -56,7 +56,7 @@ docker run -d \
 -e share;/share/path1;no;no;no;shareaccess:share2;/share/path2;no;no;no;secondshare \
 cenk1cenk2/softether-vpncli
 ```
-will connect to defined connection in connectionname, and create 2 shasres at paths /share/path1 and /share/path2 giving access to different users for different paths. The file server name will be \\\\FILESHARESERVERNAME and the MTU will be set to 1200 to enable users to use Samba over VPN connection. You can use `-p 139:139 -p 445:445` to passthrough Samba Server ports instead of `--network host --privileged` if you can not use the host mode network connection. 
+will connect to defined connection in connectionname, and create 2 shasres at paths /share/path1 and /share/path2 giving access to different users for different paths. The file server name will be \\\\FILESHARESERVERNAME and the MTU will be set to 1200 to enable users to use Samba over VPN connection. You can use `-p 139:139 -p 445:445` to passthrough Samba Server ports instead of `--network host --privileged` if you can not use the host mode network connection.
 
 **Unfortunately, CAP_ADD is not enough privileges this container to function in host mode. It has to create virtual adapter but I dont know how it is releated to host system. So until any one knows why it has to run as privileged.**
 
