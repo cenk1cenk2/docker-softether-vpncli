@@ -1,61 +1,70 @@
 #!/bin/bash
 
-echo "Initiating .env file for given container."
+echo "init-env.sh@bash: v2.0, 20190321"
+## Variables
+# Write down the data required in .env file here for initiation.
+ENVFILENAME=.env
+ENVFILECONTENTS=(
+  "##"
+  "# GENERAL SETTINGS"
+  "##"
+  "# TIMEZONE"
+  "# Leave empty or comment out if it is not used."
+  "TZ="
+  "##"
+  "# SOFTETHER VPN CLIENT SETTINGS"
+  "##"
+  "# VPN file relative path. Exported .vpn file name which must include the authentication parameters as well"
+  "# Mandatory, Default defaultconn"
+  "CONNNAME=defaultconn"
+  "# The script will check VPN connection periodically please define the period in seconds between checks."
+  "# Mandatory, Default 3600"
+  "SLEEPTIME=3600"
+  "# Static MAC address."
+  "# Leave empty or comment out if it is not used."
+  "MACADD="
+  "# Set true for internal connection to set mtu 1200 or 1500."
+  "# Leave empty or comment out if it is not used."
+  "INTCONN="
+  "##"
+  "# If your network gateway address of the VPN server is different than 1, it will override it."
+  "# Leave empty or comment out if it is not used."
+  "NETWORKGATEWAY="
+  "# EMBEDDED SAMBA SERVER SETTINGS"
+  "##"
+  "# Enable or disable internal Samba server."
+  "# Leave empty or comment out if it is not used."
+  "SAMBAENABLE="
+  "# Server WINS identification name"
+  "# Leave empty or comment out if it is not used."
+  "SRVNAME="
+  "# USERS: required arg: <username>;<passwd>"
+  "# <username> for user"
+  "# <password> for user"
+  "# [ID] for user"
+  "# [group] for user"
+  "# multiple user format: example1;password:example2;password"
+  "# Leave empty or comment out if it is not used."
+  "USERS="
+  "# MOUNTS: Configure a share"
+  "# required arg: <name>;</path>"
+  "# <name> is how it's called for clients"
+  "# <path> path to share"
+  "# NOTE: for the default value, just leave blank"
+  "# [browsable] default:'yes' or 'no'"
+  "# [readonly] default:'yes' or 'no'"
+  "# [guest] allowed default:'yes' or 'no'"
+  "# [users] allowed default:'all' or list of allowed users"
+  "# [admins] allowed default:'none' or list of admin users"
+  "# [writelist] list of users that can write to a RO share"
+  "# [comment] description of share"
+  "# multiple mount format: example1:'private share';/example1;no;no;no;example2:'very private share';/example2;no;no;no;example2"
+  "# Leave empty or comment out if it is not used."
+  "MOUNTS="
+  "# WORKGROUP NAME"
+  "# Leave empty or comment out if it is not used."
+  "WORKGROUPNAME=WORKGROUP"
+  )
 
-if [ ! -f ./.env ]; then
-    echo ".env file not found initiating."
-    FILEFOUND=false
-else
-    echo -n ".env file already initiated. You want to override? [y/N]: "
-    read -r OVERRIDE
-    if echo ${OVERRIDE::1} | grep -iqF "y"; then
-        echo "Will rewrite the .env file with the empty one."
-        FILEFOUND=false
-    else
-        echo "Not doing anything."
-        exit
-    fi
-fi
-
-FILENAME=.env
-# Container specific initiate.
-echo "TZ=Europe/Vienna" > $FILENAME
-echo "#" >> $FILENAME
-echo "# SOFTETHER VPN CLIENT SETTINGS" > $FILENAME
-echo "#" >> $FILENAME
-echo "# Exported .vpn file name which must include the authentication parameters as well" >> $FILENAME
-echo "CONNNAME=internalconn" >> $FILENAME
-echo "# Static MAC address." >> $FILENAME
-echo "# Leave empty or comment out if it is not used." >> $FILENAME
-echo "MACADD=00:00:00:00:00:00" >> $FILENAME
-echo "# Set true for internal connectione to set mtu 1200 or 1500." >> $FILENAME
-echo "# Leave empty or comment out if it is not used." >> $FILENAME
-echo "INTCONN=" >> $FILENAME
-echo "#" >> $FILENAME
-echo "# EMBEDDED SAMBA SERVER SETTINGS" >> $FILENAME
-echo "#" >> $FILENAME
-echo "# Leave empty or comment out if it is not used." >> $FILENAME
-echo "SAMBAENABLE=" >> $FILENAME
-echo "SRVNAME=" >> $FILENAME
-echo "# USERS: required arg: \"<username>;<passwd>\"
-# <username> for user
-# <password> for user
-# [ID] for user
-# [group] for user
-# multiple user format: example1;badpass:example2;badpass" >> $FILENAME
-echo "USERS=" >> $FILENAME
-echo "# MOUNTS: Configure a share
-# required arg: \"<name>;</path>\"
-# <name> is how it's called for clients
-# <path> path to share
-# NOTE: for the default value, just leave blank
-# [browsable] default:'yes' or 'no'
-# [readonly] default:'yes' or 'no'
-# [guest] allowed default:'yes' or 'no'
-# [users] allowed default:'all' or list of allowed users
-# [admins] allowed default:'none' or list of admin users
-# [writelist] list of users that can write to a RO share
-# [comment] description of share
-# multiple mount format: example1 private share;/example1;no;no;no;example1:example2 private share;/example2;no;no;no;example2" >> $FILENAME
-echo "MOUNTS=" >> $FILENAME
-echo "WORKGROUPNAME=WORKGROUP" >> $FILENAME
+## Script
+echo "Initiating ${ENVFILENAME} file."; if [[ ! -f ${ENVFILENAME} ]] || ( echo -n ".env file already initiated. You want to override? [ y/N ]: " && read -r OVERRIDE && echo ${OVERRIDE::1} | grep -iqF "y" ); then echo "Will rewrite the .env file with the default one."; > ${ENVFILENAME} && for i in "${ENVFILECONTENTS[@]}"; do echo $i >> ${ENVFILENAME}; done; echo "Opening enviroment file in nano editor."; nano ${ENVFILENAME}; echo "All done."; else echo "File already exists with no overwrite permissiong given."; echo "Not doing anything."; fi

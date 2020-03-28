@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "-------------------------------"
+echo "Terminating softether-vpncli."
+echo "-------------------------------"
+/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountdisconnect ${CONNNAME}
+echo "Deleting Virtual Network Adapter"
+/s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicdelete vpn${ADAPTERNAME}
+echo "Shutting down the daemon"
+/s6-bin/softether-vpncli/vpnclient stop
+echo "-------------------------------"
+echo "Terminated softether-vpncli."
+echo "-------------------------------"

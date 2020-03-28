@@ -1,72 +1,78 @@
 #!/bin/bash
 
 # Treat unset variables as an error
-set -o nounset                              
+set -o nounset
 
 ### charmap: setup character mapping for file/directory names
 # Arguments:
 #   chars) from:to character mappings separated by ','
 # Return: configured character mapings
-charmap() { local chars="$1" file=/etc/samba/smb.conf
-    grep -q catia $file || sed -i '/TCP_NODELAY/a \
+charmap() {
+  local chars="$1" file=/etc/samba/smb.conf
+  grep -q catia $file || sed -i '/TCP_NODELAY/a \
 \
     vfs objects = catia\
     catia:mappings =\
 
                 ' $file
 
-    sed -i '/catia:mappings/s/ =.*/ = '"$chars" $file
+  sed -i '/catia:mappings/s/ =.*/ = '"$chars" $file
 }
 
 ### global: set a global config option
 # Arguments:
 #   option) raw option
 # Return: line added to smb.conf (replaces existing line with same key)
-global() { local key="${1%%=*}" value="${1#*=}" file=/etc/samba/smb.conf
-    if grep -qE '^;*\s*'"$key" "$file"; then
-        sed -i 's|^;*\s*'"$key"'.*|   '"${key% } = ${value# }"'|' "$file"
-    else
-        sed -i '/\[global\]/a \   '"${key% } = ${value# }" "$file"
-    fi
+global() {
+  local key="${1%%=*}" value="${1#*=}" file=/etc/samba/smb.conf
+  if grep -qE '^;*\s*'"$key" "$file"; then
+    sed -i 's|^;*\s*'"$key"'.*|   '"${key% } = ${value# }"'|' "$file"
+  else
+    sed -i '/\[global\]/a \   '"${key% } = ${value# }" "$file"
+  fi
 }
 
 ### include: add a samba config file include
 # Arguments:
 #   file) file to import
-include() { local includefile="$1" file=/etc/samba/smb.conf
-    sed -i "\\|include = $includefile|d" "$file"
-    echo "include = $includefile" >> "$file"
+include() {
+  local includefile="$1" file=/etc/samba/smb.conf
+  sed -i "\\|include = $includefile|d" "$file"
+  echo "include = $includefile" >>"$file"
 }
 
 ### import: import a smbpasswd file
 # Arguments:
 #   file) file to import
 # Return: user(s) added to container
-import() { local file="$1" name id
-    while read name id; do
-        grep -q "^$name:" /etc/passwd || adduser -D -H -u "$id" "$name"
-    done < <(cut -d: -f1,2 $file | sed 's/:/ /')
-    pdbedit -i smbpasswd:$file
+import() {
+  local file="$1" name id
+  while read name id; do
+    grep -q "^$name:" /etc/passwd || adduser -D -H -u "$id" "$name"
+  done < <(cut -d: -f1,2 $file | sed 's/:/ /')
+  pdbedit -i smbpasswd:$file
 }
 
 ### perms: fix ownership and permissions of share paths
 # Arguments:
 #   none)
 # Return: result
-perms() { local i file=/etc/samba/smb.conf
-    for i in $(awk -F ' = ' '/   path = / {print $2}' $file); do
-        chown -Rh smbuser. $i
-        find $i -type d ! -perm 775 -exec chmod 775 {} \;
-        find $i -type f ! -perm 0664 -exec chmod 0664 {} \;
-    done
+perms() {
+  local i file=/etc/samba/smb.conf
+  for i in $(awk -F ' = ' '/   path = / {print $2}' $file); do
+    chown -Rh smbuser. $i
+    find $i -type d ! -perm 775 -exec chmod 775 {} \;
+    find $i -type f ! -perm 0664 -exec chmod 0664 {} \;
+  done
 }
 
 ### recycle: disable recycle bin
 # Arguments:
 #   none)
 # Return: result
-recycle() { local file=/etc/samba/smb.conf
-    sed -i '/recycle/d; /vfs/d' $file
+recycle() {
+  local file=/etc/samba/smb.conf
+  sed -i '/recycle/d; /vfs/d' $file
 }
 
 ### share: Add share
@@ -81,37 +87,39 @@ recycle() { local file=/etc/samba/smb.conf
 #   writelist) list of users that can write to a RO share
 #   comment) description of share
 # Return: result
-share() { local share="$1" path="$2" browsable="${3:-yes}" ro="${4:-yes}" \
-                guest="${5:-yes}" users="${6:-""}" admins="${7:-""}" \
-                writelist="${8:-""}" comment="${9:-""}" file=/etc/samba/smb.conf
-    sed -i "/\\[$share\\]/,/^\$/d" $file
-    echo "[$share]" >>$file
-    echo "   path = $path" >>$file
-    echo "   browsable = $browsable" >>$file
-    echo "   read only = $ro" >>$file
-    echo "   guest ok = $guest" >>$file
-    echo -n "   veto files = /._*/.apdisk/.AppleDouble/.DS_Store/" >>$file
-    echo -n ".TemporaryItems/.Trashes/desktop.ini/ehthumbs.db/" >>$file
-    echo "Network Trash Folder/Temporary Items/Thumbs.db/" >>$file
-    echo "   delete veto files = yes" >>$file
-    [[ ${users:-""} && ! ${users:-""} =~ all ]] &&
-        echo "   valid users = $(tr ',' ' ' <<< $users)" >>$file
-    [[ ${admins:-""} && ! ${admins:-""} =~ none ]] &&
-        echo "   admin users = $(tr ',' ' ' <<< $admins)" >>$file
-    [[ ${writelist:-""} && ! ${writelist:-""} =~ none ]] &&
-        echo "   write list = $(tr ',' ' ' <<< $writelist)" >>$file
-    [[ ${comment:-""} && ! ${comment:-""} =~ none ]] &&
-        echo "   comment = $(tr ',' ' ' <<< $comment)" >>$file
-    echo "" >>$file
-    [[ -d $path ]] || mkdir -p $path
+share() {
+  local share="$1" path="$2" browsable="${3:-yes}" ro="${4:-yes}" \
+    guest="${5:-yes}" users="${6:-""}" admins="${7:-""}" \
+    writelist="${8:-""}" comment="${9:-""}" file=/etc/samba/smb.conf
+  sed -i "/\\[$share\\]/,/^\$/d" $file
+  echo "[$share]" >>$file
+  echo "   path = $path" >>$file
+  echo "   browsable = $browsable" >>$file
+  echo "   read only = $ro" >>$file
+  echo "   guest ok = $guest" >>$file
+  echo -n "   veto files = /._*/.apdisk/.AppleDouble/.DS_Store/" >>$file
+  echo -n ".TemporaryItems/.Trashes/desktop.ini/ehthumbs.db/" >>$file
+  echo "Network Trash Folder/Temporary Items/Thumbs.db/" >>$file
+  echo "   delete veto files = yes" >>$file
+  [[ ${users:-""} && ! ${users:-""} =~ all ]] &&
+    echo "   valid users = $(tr ',' ' ' <<<$users)" >>$file
+  [[ ${admins:-""} && ! ${admins:-""} =~ none ]] &&
+    echo "   admin users = $(tr ',' ' ' <<<$admins)" >>$file
+  [[ ${writelist:-""} && ! ${writelist:-""} =~ none ]] &&
+    echo "   write list = $(tr ',' ' ' <<<$writelist)" >>$file
+  [[ ${comment:-""} && ! ${comment:-""} =~ none ]] &&
+    echo "   comment = $(tr ',' ' ' <<<$comment)" >>$file
+  echo "" >>$file
+  [[ -d $path ]] || mkdir -p $path
 }
 
 ### smb: disable SMB2 minimum
 # Arguments:
 #   none)
 # Return: result
-smb() { local file=/etc/samba/smb.conf
-    sed -i '/min protocol/d' $file
+smb() {
+  local file=/etc/samba/smb.conf
+  sed -i '/min protocol/d' $file
 }
 
 ### user: add a user
@@ -121,36 +129,40 @@ smb() { local file=/etc/samba/smb.conf
 #   id) for user
 #   group) for user
 # Return: user added to container
-user() { local name="$1" passwd="$2" id="${3:-""}" group="${4:-""}"
-    [[ "$group" ]] && { grep -q "^$group:" /etc/group || addgroup "$group"; }
-    grep -q "^$name:" /etc/passwd ||
-        adduser -D -H ${group:+-G $group} ${id:+-u $id} "$name"
-    echo -e "$passwd\n$passwd" | smbpasswd -s -a "$name"
+user() {
+  local name="$1" passwd="$2" id="${3:-""}" group="${4:-""}"
+  [[ "$group" ]] && { grep -q "^$group:" /etc/group || addgroup "$group"; }
+  grep -q "^$name:" /etc/passwd ||
+    adduser -D -H ${group:+-G $group} ${id:+-u $id} "$name"
+  echo -e "$passwd\n$passwd" | smbpasswd -s -a "$name"
 }
 
 ### workgroup: set the workgroup
 # Arguments:
 #   workgroup) the name to set
 # Return: configure the correct workgroup
-workgroup() { local workgroup="$1" file=/etc/samba/smb.conf
-    sed -i 's|^\( *workgroup = \).*|\1'"$workgroup"'|' $file
+workgroup() {
+  local workgroup="$1" file=/etc/samba/smb.conf
+  sed -i 's|^\( *workgroup = \).*|\1'"$workgroup"'|' $file
 }
 
 ### widelinks: allow access wide symbolic links
 # Arguments:
 #   none)
 # Return: result
-widelinks() { local file=/etc/samba/smb.conf \
-            replace='\1\n   wide links = yes\n   unix extensions = no'
-    sed -i 's/\(follow symlinks = yes\)/'"$replace"'/' $file
+widelinks() {
+  local file=/etc/samba/smb.conf \
+    replace='\1\n   wide links = yes\n   unix extensions = no'
+  sed -i 's/\(follow symlinks = yes\)/'"$replace"'/' $file
 }
 
 ### usage: Help
 # Arguments:
 #   none)
 # Return: Help text
-usage() { local RC="${1:-0}"
-    echo "Usage: ${0##*/} [-opt] [command]
+usage() {
+  local RC="${1:-0}"
+  echo "Usage: ${0##*/} [-opt] [command]
 Options (fields in '[]' are optional, '<>' are required):
     -h          This help
     -c \"<from:to>\" setup character mapping for file/directory names
@@ -192,53 +204,59 @@ Options (fields in '[]' are optional, '<>' are required):
 
 The 'command' (if provided and valid) will be run instead of samba
 " >&2
-    exit $RC
+  exit $RC
 }
 
 [[ "${USERID:-""}" =~ ^[0-9]+$ ]] && usermod -u $USERID -o smbuser
 [[ "${GROUPID:-""}" =~ ^[0-9]+$ ]] && groupmod -g $GROUPID -o users
 
 while getopts ":hc:g:i:nprs:Su:Ww:I:" opt; do
-    case "$opt" in
-        h) usage ;;
-        c) charmap "$OPTARG" ;;
-        g) global "$OPTARG" ;;
-        i) import "$OPTARG" ;;
-        n) NMBD="true" ;;
-        p) PERMISSIONS="true" ;;
-        r) recycle ;;
-        s) eval share $(sed 's/^/"/; s/$/"/; s/;/" "/g' <<< $OPTARG) ;;
-        S) smb ;;
-        u) eval user $(sed 's/^/"/; s/$/"/; s/;/" "/g' <<< $OPTARG) ;;
-        w) workgroup "$OPTARG" ;;
-        W) widelinks ;;
-        I) include "$OPTARG" ;;
-        "?") echo "Unknown option: -$OPTARG"; usage 1 ;;
-        ":") echo "No argument value for option: -$OPTARG"; usage 2 ;;
-    esac
+  case "$opt" in
+  h) usage ;;
+  c) charmap "$OPTARG" ;;
+  g) global "$OPTARG" ;;
+  i) import "$OPTARG" ;;
+  n) NMBD="true" ;;
+  p) PERMISSIONS="true" ;;
+  r) recycle ;;
+  s) eval share $(sed 's/^/"/; s/$/"/; s/;/" "/g' <<<$OPTARG) ;;
+  S) smb ;;
+  u) eval user $(sed 's/^/"/; s/$/"/; s/;/" "/g' <<<$OPTARG) ;;
+  w) workgroup "$OPTARG" ;;
+  W) widelinks ;;
+  I) include "$OPTARG" ;;
+  "?")
+    echo "Unknown option: -$OPTARG"
+    usage 1
+    ;;
+  ":")
+    echo "No argument value for option: -$OPTARG"
+    usage 2
+    ;;
+  esac
 done
-shift $(( OPTIND - 1 ))
+shift $((OPTIND - 1))
 
 [[ "${CHARMAP:-""}" ]] && charmap "$CHARMAP"
 [[ "${GLOBAL:-""}" ]] && global "$GLOBAL"
 [[ "${IMPORT:-""}" ]] && import "$IMPORT"
 [[ "${PERMISSIONS:-""}" ]] && perms
 [[ "${RECYCLE:-""}" ]] && recycle
-[[ "${SHARE:-""}" ]] && eval share $(sed 's/^/"/; s/$/"/; s/;/" "/g' <<< $SHARE)
+[[ "${SHARE:-""}" ]] && eval share $(sed 's/^/"/; s/$/"/; s/;/" "/g' <<<$SHARE)
 [[ "${SMB:-""}" ]] && smb
-[[ "${USER:-""}" ]] && eval user $(sed 's/^/"/; s/$/"/; s/;/" "/g' <<< $USER)
+[[ "${USER:-""}" ]] && eval user $(sed 's/^/"/; s/$/"/; s/;/" "/g' <<<$USER)
 [[ "${WORKGROUP:-""}" ]] && workgroup "$WORKGROUP"
 [[ "${WIDELINKS:-""}" ]] && widelinks
 [[ "${INCLUDE:-""}" ]] && include "$INCLUDE"
 
 if [[ $# -ge 1 && -x $(which $1 2>&-) ]]; then
-    exec "$@"
+  exec "$@"
 elif [[ $# -ge 1 ]]; then
-    echo "ERROR: command not found: $1"
-    exit 13
+  echo "ERROR: command not found: $1"
+  exit 13
 elif ps -ef | egrep -v grep | grep -q smbd; then
-    echo "Service already running, please restart container to apply changes"
+  echo "Service already running, please restart container to apply changes"
 else
-    [[ ${NMBD:-""} ]] && nmbd -D
-    exec smbd --no-process-group </dev/null
+  [[ ${NMBD:-""} ]] && nmbd -D
+  exec smbd --no-process-group </dev/null
 fi
