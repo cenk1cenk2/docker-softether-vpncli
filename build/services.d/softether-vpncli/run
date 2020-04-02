@@ -73,12 +73,12 @@ if ! [[ -z "${IPADDRESS}" ]]; then
     echo "Connection to ${NETWORKADDRESS}${NETWORKGATEWAY:-1} can be established. User has valid IP configuration."
     echo "Sleeping ${SLEEPTIME:-3600} seconds."
     echo "-------------------------------"
-    s6-pause ${SLEEPTIME:-3600}
+    s6-sleep ${SLEEPTIME:-3600}
   done
 else
   echo "-------------------------------"
   echo "Error: Can not obtain IP Address."
   echo "Retrying to connect in 3 seconds."
   echo "-------------------------------"
-  s6-pause 3
+  s6-sleep 3
 fi

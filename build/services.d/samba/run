@@ -40,11 +40,11 @@ if ! [[ -z ${SAMBAENABLE} ]]; then
     echo "Samba server still running and healthy."
     echo "Sleeping ${SLEEPTIME:-3600} minutes."
     echo "-------------------------------"
-    s6-pause ${SLEEPTIME:-3600}
+    s6-sleep ${SLEEPTIME:-3600}
   done
 else
   echo "-------------------------------"
   echo "Samba Server not enabled."
   echo "-------------------------------"
-  s6-pause 86400
+  s6-sleep 86400
 fi
