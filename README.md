@@ -9,7 +9,7 @@
 ```
 name:         | softether-vpncli
 compiler:     | docker-compose + dockerfile
-version:      | v5.01.9672, 20200402 | Autoupdated
+version:      | v5.01.9674, 20200510 | Autoupdated
 ```
 
 ## Description:
