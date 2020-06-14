@@ -45,7 +45,7 @@ steps:
         from_secrets: github_deploy_token
       do_tag: true
       do_release: true
-      debug: true
+      loglevel: true
     when:
       event:
         - cron
