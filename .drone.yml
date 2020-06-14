@@ -41,7 +41,7 @@ steps:
       track_repo: SoftEtherVPN/SoftEtherVPN
       git_username:
         from_secrets: github_username
-      git_password:
+      git_token:
         from_secrets: github_deploy_token
       do_tag: true
       do_release: true
