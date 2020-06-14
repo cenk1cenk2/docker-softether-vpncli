@@ -15,7 +15,6 @@ steps:
       update_readme_toc: true
       readme_location: README.md
       git_method: gh
-      git_user_name: semantic-relase
       git_user_email:
         from_secret: github_username
       github_token:
@@ -39,9 +38,9 @@ steps:
       this_repo: cenk1cenk2/softether-vpncli
       track_repo: SoftEtherVPN/SoftEtherVPN
       git_username:
-        from_secrets: github_username
+        from_secret: github_username
       git_token:
-        from_secrets: github_deploy_token
+        from_secret: github_deploy_token
       do_tag: true
       do_release: true
     when:
