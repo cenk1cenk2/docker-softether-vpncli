@@ -4,12 +4,13 @@
 
 <!-- toc -->
 
-- [Features](#features)
+- [Description:](#description)
+  - [Features](#features)
 - [Setup](#setup)
-- [Fast Deploy](#fast-deploy)
-- [Manual Setup](#manual-setup)
-  - [Example Setup](#example-setup)
-  - [Enviromental Variables File with Explanation](#enviromental-variables-file-with-explanation)
+  - [Fast Deploy](#fast-deploy)
+  - [Manual Setup](#manual-setup)
+    - [Example Setup](#example-setup)
+    - [Enviromental Variables File with Explanation](#enviromental-variables-file-with-explanation)
 
 <!-- tocstop -->
 
