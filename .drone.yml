@@ -7,7 +7,6 @@ trigger:
   branch:
     - master
 
-name: auto-deploy
 steps:
   - name: semantic-release
     image: cenk1cenk2/drone-semantic-release
@@ -45,7 +44,6 @@ steps:
         from_secrets: github_deploy_token
       do_tag: true
       do_release: true
-      loglevel: debug
     when:
       event:
         - cron
