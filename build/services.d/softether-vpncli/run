@@ -8,11 +8,11 @@ log_start "Starting Softether Client..."
 
 log_info "Parsing adapter name in the defined connection..."
 ADAPTERNAME=$(eval grep -E "DeviceName" /${CONNNAME:-defaultconn}.vpn | sed -r 's/.*DeviceName VPN(.*)$/\1/I' | sed 's/\r//g')
-log_this "VPN_VPN${ADAPTERNAME}" "${GREEN}ADAPTER${RESET}" "INFO"
+log_this "VPN_VPN${ADAPTERNAME}" "${BLUE}ADAPTER${RESET}" "INFO"
 
 log_info "Get account name in the defined connection."
 ACCOUNTNAME=$(eval grep -E "AccountName" /${CONNNAME:-defaultconn}.vpn | sed -r 's/.*AccountName (.*)$/\1/' | sed 's/\r//g')
-log_this "${ACCOUNTNAME}" "${GREEN}ACCOUNT${RESET}" "INFO"
+log_this "${ACCOUNTNAME}" "${BLUE}ACCOUNT${RESET}" "INFO"
 
 log_info "Creating new virtual ethernet adapter."
 eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicdelete vpn${ADAPTERNAME} >/dev/null 2>&1
@@ -35,7 +35,7 @@ send "exit\r"
 EOD
 
 if ! [[ -z ${MACADD} ]]; then
-  log_this "${MACADD}" "${GREEN}MAC${RESET}" "INFO"
+  log_this "${MACADD}" "${BLUE}MAC${RESET}" "INFO"
   eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicsetsetting vpn${ADAPTERNAME} /MAC:${MACADD} >/dev/null
   eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicupgrade vpn${ADAPTERNAME} >/dev/null
 
@@ -55,7 +55,7 @@ eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountconnect ${ACC
 if ! [[ -z ${INTCONN} ]]; then
   log_info "Internal connection variable defined in enviromental variables." "top"
 
-  log_this "1200" "${GREEN}MTU${RESET}" "INFO"
+  log_this "1200" "${BLUE}MTU${RESET}" "INFO"
 
   eval ip link set dev vpn_vpn${ADAPTERNAME} mtu 1200 >/dev/null
   eval ip link set vpn_vpn${ADAPTERNAME} down && sleep 1 && ip link set vpn_vpn${ADAPTERNAME} up >/dev/null
@@ -66,7 +66,7 @@ eval dhclient vpn_vpn${ADAPTERNAME} >/dev/null
 IPADDRESS=$(ifconfig vpn_vpn${ADAPTERNAME} | awk '/inet addr/{print substr($2,6)}')
 
 if ! [[ -z "${IPADDRESS}" ]]; then
-  log_this "${IPADDRESS}" "${GREEN}IP${RESET}" "INFO"
+  log_this "${IPADDRESS}" "${BLUE}IP${RESET}" "INFO"
 
   NETWORKADDRESS=$(echo ${IPADDRESS} | sed -r -e 's/^([0-9]*\.[0-9]*\.[0-9]*\.).*$/\1/')
 
