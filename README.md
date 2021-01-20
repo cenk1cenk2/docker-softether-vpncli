@@ -4,65 +4,190 @@
 
 <!-- toc -->
 
-- [Description:](#description)
-  - [Features](#features)
-- [Setup](#setup)
-  - [Fast Deploy](#fast-deploy)
-  - [Manual Setup](#manual-setup)
-    - [Example Setup](#example-setup)
-    - [Enviromental Variables File with Explanation](#enviromental-variables-file-with-explanation)
+- [Description](#description)
+- [Features](#features)
+  - [Resource-Efficient](#resource-efficient)
+  - [Up-to-Date](#up-to-date)
+  - [Version Tracking](#version-tracking)
+  - [Always Alive](#always-alive)
+  - [Graceful Shutdown](#graceful-shutdown)
+  - [Internal File Sharing](#internal-file-sharing)
+  - [Internal Connections](#internal-connections)
+- [Environment Variables](#environment-variables)
+  - [General Environment Variables](#general-environment-variables)
+  - [SoftEther Client Environment Variables](#softether-client-environment-variables)
+  - [Samba Environment Variables](#samba-environment-variables)
+    - [Users Format](#users-format)
+    - [Mounts Format](#mounts-format)
+- [Deploy](#deploy)
+  - [With docker-compose](#with-docker-compose)
+  - [With docker](#with-docker)
 
 <!-- tocstop -->
 
-## Description:
+---
+
+## Description
 
 SoftEther VPN is free open-source, cross-platform, multi-protocol VPN client and VPN server software, developed as part of Daiyuu Nobori's master's thesis research at the University of Tsukuba. VPN protocols such as SSL VPN, L2TP/IPsec, OpenVPN, and Microsoft Secure Socket Tunneling Protocol are provided in a single VPN server.
 
-A Docker Container that creates a Softether Client instance to connect to the defined connection in the imported VPN file with an option to enable Samba File Sharing server to internally share files through VPN.
+A Docker Container that creates a Softether Client instance to connect to the defined connection in the imported VPN file with an option to enable Samba file sharing server to internally share files through VPN.
 
-### Features
+[Read more](https://www.softether.org/) about SoftEther in the official documentation.
 
-- S6-Overlay implemented. So in every new connection, a new virtual adapter will be created and after the connection is terminated, it will be removed gracefully.
-- The connection will be checked every defined seconds to X.X.X.1 as the server to be sure of that it is still alive and if the server can not be reached it will restart the whole process thanks to S6-Overlay in case of hangs.
-- Ability to enable embedded Samba Server if you desire to share files between devices in a private network.
-- Internal connection switch, which will reduce the MTU of the virtual ethernet adapter to 1200 so that Samba shares through the internet will not be slow due to the overhead of the packets with VPN data and instead of trying to split into multiple packets.
-- Always builds the latest version from the official GitHub repository of SoftEther.
-- ~70MB image size, ~15-20MB RAM Usage while standalone.
+## Features
 
-## Setup
+### Resource-Efficient
 
-Clone the GitHub repository to get an environmental variable initiation script and preconfigured docker-compose file if you wish to get a head start.
+Build on top of Alpine linux as base, ~70MB image size, ~15-20MB RAM Usage while standby.
 
-### Fast Deploy
+### Up-to-Date
 
-```
+This repository is always up to date tracking the [default](https://github.com/SoftEtherVPN/SoftEtherVPN) repository of SoftEther VPN on GitHub. It checks the main repository monthly, since there is not frequent updates anymore, and if a new release has been matched it will trigger the build process.
+
+It always builds the application from the source, and while doing that the dependencies will also be updated.
+
+### Version Tracking
+
+The Docker images are given matching versions to the original repository. If a update has been made on this repository itself, it will append a suffix to the original version.
+
+### Always Alive
+
+[s6-overlay](https://github.com/just-containers/s6-overlay) is implemented to check whether everything is working as expected and do a sanity check with pinging the main VPN server periodically as well as checking the health of Samba file client if it is enabled.
+
+A environment variable, namely `SLEEPTIME` can be set in seconds to determine the period of this check.
+
+If the periodic check fails, it will go in to graceful shutdown mode and clear any residue like tap devices, virtual network adapters and such, so it can restart from scratch.
+
+### Graceful Shutdown
+
+At shutdown or crashes, the container cleans up all the created veth interfaces, tap devices and undoes all the system changes.
+
+### Internal File Sharing
+
+Ability to enable embedded Samba Server if you desire to share files between devices in a private network.
+
+### Internal Connections
+
+Internal connection switch, which will reduce the MTU of the virtual ethernet adapter to 1200 so that Samba shares through the internet will not be slow due to the overhead of the packets with VPN data and instead of trying to split into multiple packets.
+
+On the other end of the devices, if VPN adapter MTU is set to 1200, it will work its best. This is due to the VPN overhead of the packages and general network MTU being 1500.
+
+## Environment Variables
+
+### General Environment Variables
+
+| Environment Variable | Description                                                                       | Default Value |
+| -------------------- | --------------------------------------------------------------------------------- | ------------- |
+| `TZ`                 | Timezone for the server.                                                          |               |
+| `LOG_LEVEL`          | Log level for the scripts. Can be: [ SILENT, ERROR, WARN, LIFETIME, INFO, DEBUG ] | INFO          |
+| `SLEEPTIME`          | The time in seconds between checks of whether everything is working.              | 3600          |
+
+### SoftEther Client Environment Variables
+
+| Environment Variable | Description                                                                    | Default Value |
+| -------------------- | ------------------------------------------------------------------------------ | ------------- |
+| `CONNNAME`           | Name of the connection file which should be mounted with the same name on `/`. | defaultconn   |
+| `MACADD`             | Give a MAC address to the virtual network adapter.                             |               |
+| `INTCONN`            | To set the MTU to 1200 for improving the performance between VPN devices.      |               |
+| `NETWORKGATEWAY`     | If the network gateway uses a different value.                                 | 1             |
+
+### Samba Environment Variables
+
+| Environment Variable | Description                                                                          | Default Value |
+| -------------------- | ------------------------------------------------------------------------------------ | ------------- |
+| `SAMBAENABLE`        | Enable the internal samba server, set to anything.                                   |               |
+| `SRVNAME`            | WINS identification name.                                                            |               |
+| `USERS`              | [username];[passwd];[uid];[gid]                                                      |               |
+| `MOUNTS`             | [name];[path];[browsable];[readonly];[guest];[users];[admins];[writelist];[comment]] |               |
+| `WORKGROUPNAME`      | Workgroup name to join.                                                              | WORKGROUP     |
+
+**`USERS` and `MOUNTS` can have multiple values with colon separated (`:`) values.**
+
+#### Users Format
+
+| Value    | Description                | Default | Options | Optional |
+| -------- | -------------------------- | ------- | ------- | -------- |
+| username | Samba username for login.  |         |         | no       |
+| password | Samba password for login.  |         |         | no       |
+| uid      | User ID for created user.  |         |         | yes      |
+| gid      | Group ID for created user. |         |         | yes      |
+
+**Example:**
+
+> ```text
+> example1;password:example2;password
+> ```
+
+#### Mounts Format
+
+| Value     | Description                                                                  | Default | Options | Optional |
+| --------- | ---------------------------------------------------------------------------- | ------- | ------- | -------- |
+| name      | Name to display on the share.                                                |         |         | no       |
+| path      | Internal container path to share.                                            |         |         | no       |
+| browsable | Whether the share is browsable.                                              | yes     | yes, no | yes      |
+| readonly  | Whether the share is readonly.                                               | yes     | yes, no | yes      |
+| guest     | Whether the share is available to guests.                                    | yes     | yes, no | yes      |
+| users     | Determine the users that have the ability have access. Separated by commas.  | all     |         | yes      |
+| admins    | Determine the admins that have the ability have access. Separated by commas. | none    |         | yes      |
+| writelist | Users that can write on read-only share                                      |         |         | yes      |
+| comment   | Comment on the share                                                         |         |         | yes      |
+
+**Example:**
+
+> ```text
+> 'private share';/example1;no;no;no;example2:'very private share';/example2;no;no;no;example2
+> ```
+
+## Deploy
+
+Clone the GitHub repository to get an environmental variable initiation script and preconfigured docker-compose file if you wish to get a head start. Advised way to run the setup is with docker-compose but it can be run with a long command with docker run.
+
+**Unfortunately, CAP_ADD is not enough privileges this container to function in host mode. It has to create virtual adapter in the network namespace but some additional things are also performed.**
+
+### With docker-compose
+
+```bash
 # Clone repo
-git clone git@github.com:cenk1cenk2/softether-vpnsrv.git
-# Initiate environment variables for convience
+git clone git@github.com:cenk1cenk2/softether-vpncli.git
+
+# Initiate environment variables for convienence
 chmod +x init-env.sh
+
 ./init-env.sh
-nano .env | vi .env
+
+# Edit docker-compose and env file for adding samba mounts and server settings
+nvim .env
 
 # Copy your profile
 cp internalconn.vpn ./internalconn.vpn # Has a default
-# Edit docker-compose and env file for adding samba mounts
 ```
 
-### Manual Setup
+### With docker
 
-If it is not possible to run the shell script that will generate the default .env file or running it directly from the command line the explanation for all the variables can be found below.
-
-Only mandatory variables are $CONNNAME and $SLEEPTIME. But they both have default values to fall back to if you don't want to define any variables while running on the command line.
-
-#### Example Setup
-
-`docker run --name softether-vpncli -v $(pwd)/defaultconn.vpn:/defaultconn.vpn --network bridge --privileged cenk1cenk2/softether-vpncli`
-will connect to defined connection in connectionname.vpn, it will only connect the _container_ to the VPN.
-
-`docker run --name softether-vpncli -v $(pwd)/defaultconn.vpn:/defaultconn.vpn --network host --privileged cenk1cenk2/softether-vpncli`
-will connect to defined connection in connectionname.vpn, it will _also connect your host PC_ **if running Linux** to the VPN as well.
-
+```bash
+docker run -d \
+--name softether-vpncli \
+-v $(pwd)/defaultconn.vpn:/defaultconn.vpn \
+--network bridge \
+--privileged \
+cenk1cenk2/softether-vpncli
 ```
+
+- Will connect to defined connection in "connectionname.vpn", it will only connect the _container_ to the VPN.
+
+```bash
+docker run -d \
+--name softether-vpncli \
+-v $(pwd)/defaultconn.vpn:/defaultconn.vpn \
+--network host \
+--privileged \
+cenk1cenk2/softether-vpncli
+```
+
+- Will connect to defined connection in "connectionname.vpn", it will _also connect your host PC_ **if running Linux** to the VPN as well.
+
+```bash
 docker run -d \
 --name softether-vpncli \
 -v $(pwd)/connectionname.vpn:/defaultconn.vpn \
@@ -77,71 +202,8 @@ docker run -d \
 cenk1cenk2/softether-vpncli
 ```
 
-will connect to defined connection in connectionname, and create 2 shasres at paths /share/path1 and /share/path2 giving access to different users for different paths. The file server name will be \\\\FILESHARESERVERNAME and the MTU will be set to 1200 to enable users to use Samba over VPN connection. You can use `-p 139:139 -p 445:445` to passthrough Samba Server ports instead of `--network host --privileged` if you can not use the host mode network connection.
-
-**Unfortunately, CAP_ADD is not enough privileges this container to function in host mode. It has to create virtual adapter but I dont know how it is releated to host system. So until any one knows why it has to run as privileged.**
-
-#### Enviromental Variables File with Explanation
-
-```
-##
-# GENERAL SETTINGS
-##
-# TIMEZONE
-# Leave empty or comment out if it is not used.
-TZ=
-##
-# SOFTETHER VPN CLIENT SETTINGS
-##
-# VPN file relative path. Exported .vpn file name which must include the authentication parameters as well
-# Mandatory, Default defaultconn
-CONNNAME=defaultconn
-# The script will check VPN connection periodically please define the period in seconds between checks.
-# Mandatory, Default 3600
-SLEEPTIME=3600
-# Static MAC address.
-# Leave empty or comment out if it is not used.
-MACADD=
-# Set true for internal connection to set mtu 1200 or 1500.
-# Leave empty or comment out if it is not used.
-INTCONN=
-##
-# If your network gateway address of the VPN server is different than 1, it will override it.
-# Leave empty or comment out if it is not used.
-NETWORKGATEWAY=
-# EMBEDDED SAMBA SERVER SETTINGS
-##
-# Enable or disable internal Samba server.
-# Leave empty or comment out if it is not used.
-SAMBAENABLE=
-# Server WINS identification name
-# Leave empty or comment out if it is not used.
-SRVNAME=
-# USERS: required arg: "<username>;<passwd>"
-# <username> for user
-# <password> for user
-# for rest of the data; to obtain default value, just leave blank
-# [ID] for user
-# [group] for user
-# multiple user format: example1;password:example2;password
-# Leave empty or comment out if it is not used.
-USERS=
-# MOUNTS: Configure a share
-# required arg: "<name>;</path>"
-# <name> is how it's called for clients
-# <path> path to share
-# for rest of the data; to obtain default value, just leave blank
-# [browsable] default:'yes' or 'no'
-# [readonly] default:'yes' or 'no'
-# [guest] allowed default:'yes' or 'no'
-# [users] allowed default:'all' or list of allowed users
-# [admins] allowed default:'none' or list of admin users
-# [writelist] list of users that can write to a RO share
-# [comment] description of share
-# multiple mount format: example1 private share;/example1;no;no;no;example1:example2 private share;/example2;no;no;no;example2
-# Leave empty or comment out if it is not used.
-MOUNTS=
-# WORKGROUP NAME
-# Leave empty or comment out if it is not used.
-WORKGROUPNAME=WORKGROUP
-```
+- Will connect to defined connection in "connectionname.vpn"
+- Create 2 shares at paths "/share/path1" and "/share/path2 giving access to different users for different paths.
+- The file server name will be "\\\\FILESHARESERVERNAME".
+- MTU will be set to 1200 to enable users to use Samba over VPN connection.
+- You can use `-p 139:139 -p 445:445` to passthrough Samba Server ports instead of `--network host --privileged` if you can not use the host mode network connection.

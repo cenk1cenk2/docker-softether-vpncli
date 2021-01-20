@@ -72,8 +72,7 @@ RUN apk --no-cache --no-progress update && \
   echo '   disable spoolss = yes' >>$file && \
   echo '   socket options = TCP_NODELAY' >>$file && \
   echo '   strict locking = no' >>$file && \
-  echo '   vfs objects = acl_xattr catia fruit recycle streams_xattr' \
-  >>$file && \
+  echo '   vfs objects = acl_xattr catia fruit recycle streams_xattr' >>$file && \
   echo '   recycle:keeptree = yes' >>$file && \
   echo '   recycle:versions = yes' >>$file && \
   echo '' >>$file && \
@@ -98,11 +97,21 @@ RUN apk --no-cache --no-progress update && \
   # Clean Up Files
   rm -rf /tmp/*
 
+# Create default configuration folders
+RUN mkdir -p /scripts
+
+# Copy scripts
+ADD https://gist.githubusercontent.com/cenk1cenk2/e03d8610534a9c78f755c1c1ed93a293/raw/28b96c2e3d6150cb0adc4489c87c7a1658747d0f/logger.sh /scripts/logger.sh
+
+RUN chmod +x /scripts/*.sh
+
 # Expose samba ports
 EXPOSE 139 445
 
 # Move s6 supervisor files inside the container
 COPY ./services.d /etc/services.d
+
+RUN chmod +x /etc/services.d/*/*.sh
 
 # s6 behaviour, https://github.com/just-containers/s6-overlay
 ENV S6_KEEP_ENV 1

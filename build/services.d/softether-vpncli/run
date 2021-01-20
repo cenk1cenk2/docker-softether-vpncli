@@ -1,20 +1,24 @@
 #!/bin/bash
 
+source /scripts/logger.sh
+
 # SOFTETHER START
-echo "-------------------------------"
-echo "Starting Softether Client..."
-echo "-------------------------------"
+log_start "Starting Softether Client..."
 /s6-bin/softether-vpncli/vpnclient start >/dev/null
-echo "Get adapter name in the defined connection."
+
+log_info "Parsing adapter name in the defined connection..."
 ADAPTERNAME=$(eval grep -E "DeviceName" /${CONNNAME:-defaultconn}.vpn | sed -r 's/.*DeviceName VPN(.*)$/\1/I' | sed 's/\r//g')
-echo "Adapter Name: VPN_VPN${ADAPTERNAME}"
-echo "Get account name in the defined connection."
+log_this "VPN_VPN${ADAPTERNAME}" "${GREEN}ADAPTER${RESET}" "INFO"
+
+log_info "Get account name in the defined connection."
 ACCOUNTNAME=$(eval grep -E "AccountName" /${CONNNAME:-defaultconn}.vpn | sed -r 's/.*AccountName (.*)$/\1/' | sed 's/\r//g')
-echo "Account Name: ${ACCOUNTNAME}"
-echo "Creating new virtual ethernet adapter."
+log_this "${ACCOUNTNAME}" "${GREEN}ACCOUNT${RESET}" "INFO"
+
+log_info "Creating new virtual ethernet adapter."
 eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicdelete vpn${ADAPTERNAME} >/dev/null 2>&1
 eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD niccreate vpn${ADAPTERNAME} >/dev/null 2>&1
-echo "Importing defined ${CONNNAME:-defaultconn} connection."
+
+log_info "Importing defined ${CONNNAME:-defaultconn} connection."
 /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountdisconnect ${ACCOUNTNAME} >/dev/null
 /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountdelete ${ACCOUNTNAME} >/dev/null
 # Writing this with expect here because command line interface does not allow / in start of filename
@@ -31,54 +35,51 @@ send "exit\r"
 EOD
 
 if ! [[ -z ${MACADD} ]]; then
-  echo "-------------------------------"
-  echo "MAC Address variable defined in enviromental variables."
-  echo "Setting MAC address of the interface to: ${MACADD}"
+  log_this "${MACADD}" "${GREEN}MAC${RESET}" "INFO"
   eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicsetsetting vpn${ADAPTERNAME} /MAC:${MACADD} >/dev/null
   eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD nicupgrade vpn${ADAPTERNAME} >/dev/null
-  echo "Restart VPN Client for MAC Address to be set."
-  echo "-------------------------------"
+
+  log_info "Restart VPN Client for MAC Address to be set."
   /s6-bin/softether-vpncli/vpnclient stop >/dev/null
   /s6-bin/softether-vpncli/vpnclient start >/dev/null
+  log_info "VPN Client restarted."
 fi
 
-echo "Connecting to defined ${CONNNAME:-defaultconn} connection."
-sleep 3
+log_wait "Waiting 3 seconds."
+s6-sleep 3
+
+log_info "Connecting to defined ${CONNNAME:-defaultconn} connection."
 eval /s6-bin/softether-vpncli/vpncmd localhost /CLIENT /CMD accountconnect ${ACCOUNTNAME} >/dev/null
 
 # This is only valid for internal connections.
 if ! [[ -z ${INTCONN} ]]; then
-  echo "-------------------------------"
-  echo "Internal connection variable defined in enviromental variables."
-  echo "Set adapter MTU to 1200."
-  echo "-------------------------------"
+  log_info "Internal connection variable defined in enviromental variables." "top"
+
+  log_this "1200" "${GREEN}MTU${RESET}" "INFO"
+
   eval ip link set dev vpn_vpn${ADAPTERNAME} mtu 1200 >/dev/null
   eval ip link set vpn_vpn${ADAPTERNAME} down && sleep 1 && ip link set vpn_vpn${ADAPTERNAME} up >/dev/null
 fi
 
-echo "-------------------------------"
-echo "Requesting IP Address from Server"
-echo "-------------------------------"
+log_info "Requesting IP Address from server..." "top"
 eval dhclient vpn_vpn${ADAPTERNAME} >/dev/null
 IPADDRESS=$(ifconfig vpn_vpn${ADAPTERNAME} | awk '/inet addr/{print substr($2,6)}')
+
 if ! [[ -z "${IPADDRESS}" ]]; then
-  echo "IP Address Obtained: ${IPADDRESS}"
+  log_this "${IPADDRESS}" "${GREEN}IP${RESET}" "INFO"
+
   NETWORKADDRESS=$(echo ${IPADDRESS} | sed -r -e 's/^([0-9]*\.[0-9]*\.[0-9]*\.).*$/\1/')
+
   while
     ping -c 1 -W 10 "${NETWORKADDRESS}${NETWORKGATEWAY:-1}" >&/dev/null
     :
   do
-    echo "-------------------------------"
-    echo "IP Address: ${IPADDRESS}"
-    echo "Connection to ${NETWORKADDRESS}${NETWORKGATEWAY:-1} can be established. User has valid IP configuration."
-    echo "Sleeping ${SLEEPTIME:-3600} seconds."
-    echo "-------------------------------"
+    log_this "Connection to server ${NETWORKADDRESS}${NETWORKGATEWAY:-1} can be established." "${GREEN}SOFTETHER${RESET}" "INFO" "top"
+    log_wait "Next check in ${SLEEPTIME:-3600} seconds."
     s6-sleep ${SLEEPTIME:-3600}
   done
 else
-  echo "-------------------------------"
-  echo "Error: Can not obtain IP Address."
-  echo "Retrying to connect in 3 seconds."
-  echo "-------------------------------"
+  log_error "Can not obtain IP address." "top"
+  log_wait "Retrying to connect in 3 seconds."
   s6-sleep 3
 fi

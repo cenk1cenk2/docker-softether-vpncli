@@ -11,15 +11,17 @@ ENVFILECONTENTS=(
   "# TIMEZONE"
   "# Leave empty or comment out if it is not used."
   "TZ="
+  "# The script will check VPN connection periodically please define the period in seconds between checks."
+  "# Mandatory, Default 3600"
+  "SLEEPTIME=3600"
+  "# Log level for the scripts. Can be [ SILENT, ERROR, WARN, LIFETIME, INFO, DEBUG ] (default: INFO)"
+  "LOG_LEVEL=INFO"
   "##"
   "# SOFTETHER VPN CLIENT SETTINGS"
   "##"
   "# VPN file relative path. Exported .vpn file name which must include the authentication parameters as well"
   "# Mandatory, Default defaultconn"
   "CONNNAME=defaultconn"
-  "# The script will check VPN connection periodically please define the period in seconds between checks."
-  "# Mandatory, Default 3600"
-  "SLEEPTIME=3600"
   "# Static MAC address."
   "# Leave empty or comment out if it is not used."
   "MACADD="
@@ -64,7 +66,17 @@ ENVFILECONTENTS=(
   "# WORKGROUP NAME"
   "# Leave empty or comment out if it is not used."
   "WORKGROUPNAME=WORKGROUP"
-  )
+)
 
 ## Script
-echo "Initiating ${ENVFILENAME} file."; if [[ ! -f ${ENVFILENAME} ]] || ( echo -n ".env file already initiated. You want to override? [ y/N ]: " && read -r OVERRIDE && echo ${OVERRIDE::1} | grep -iqF "y" ); then echo "Will rewrite the .env file with the default one."; > ${ENVFILENAME} && for i in "${ENVFILECONTENTS[@]}"; do echo $i >> ${ENVFILENAME}; done; echo "Opening enviroment file in nano editor."; nano ${ENVFILENAME}; echo "All done."; else echo "File already exists with no overwrite permissiong given."; echo "Not doing anything."; fi
+echo "Initiating ${ENVFILENAME} file."
+if [[ ! -f ${ENVFILENAME} ]] || (echo -n ".env file already initiated. You want to override? [ y/N ]: " && read -r OVERRIDE && echo ${OVERRIDE::1} | grep -iqF "y"); then
+  echo "Will rewrite the .env file with the default one."
+  >${ENVFILENAME} && for i in "${ENVFILECONTENTS[@]}"; do echo $i >>${ENVFILENAME}; done
+  echo "Opening enviroment file in nano editor."
+  nano ${ENVFILENAME}
+  echo "All done."
+else
+  echo "File already exists with no overwrite permissiong given."
+  echo "Not doing anything."
+fi
